@@ -51,7 +51,6 @@ function Settings() {
   const [allergiesOther, setAllergiesOther] = useState("");
   const [health, setHealth] = useState<string[]>([]);
   const [healthOther, setHealthOther] = useState("");
-  const [glp1, setGlp1] = useState(false);
   const [goal, setGoal] = useState("");
 
   useEffect(() => {
@@ -84,9 +83,12 @@ function Settings() {
         setDietaryOther(d.other);
         setAllergies(a.selected);
         setAllergiesOther(a.other);
-        setHealth(h.selected);
+        setHealth(
+          data.glp1_user && !h.selected.includes(HEALTH_GLP1_OPTION)
+            ? [...h.selected, HEALTH_GLP1_OPTION]
+            : h.selected,
+        );
         setHealthOther(h.other);
-        setGlp1(data.glp1_user ?? false);
         setGoal(data.eating_goal ?? "");
       });
   }, [user]);
@@ -140,9 +142,10 @@ function Settings() {
       const { error: prefErr } = await supabase.from("preferences").upsert({
         user_id: user.id,
         dietary_restrictions: mergedDietary,
+        dietary_restrictions: mergedDietary,
         allergies: mergedAllergies,
         health_conditions: mergedHealth,
-        glp1_user: glp1,
+        glp1_user: health.includes(HEALTH_GLP1_OPTION),
         eating_goal: goal,
       });
       if (prefErr) throw prefErr;
@@ -295,17 +298,6 @@ function Settings() {
             />
           </div>
         </div>
-
-        <div className="mt-6">
-          <h3 className="text-sm font-medium">GLP-1 medication</h3>
-          <p className="text-xs text-muted-foreground">
-            Like Ozempic, Wegovy, or Mounjaro.
-          </p>
-          <div className="mt-2">
-            <Glp1Toggle value={glp1} onChange={setGlp1} />
-          </div>
-        </div>
-
         <div className="mt-6">
           <h3 className="text-sm font-medium">Eating goal</h3>
           <div className="mt-2">
