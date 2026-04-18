@@ -9,9 +9,9 @@ import {
   ALLERGENS,
   CheckGroup,
   DIETARY,
-  Glp1Toggle,
   GoalRadio,
   HEALTH,
+  HEALTH_GLP1_OPTION,
   OtherInput,
 } from "@/components/preferences-form";
 
@@ -31,10 +31,9 @@ function Onboarding() {
   const [allergiesOther, setAllergiesOther] = useState("");
   const [health, setHealth] = useState<string[]>([]);
   const [healthOther, setHealthOther] = useState("");
-  const [glp1, setGlp1] = useState(false);
   const [goal, setGoal] = useState("");
 
-  const steps = ["Dietary", "Allergies", "Health", "GLP-1", "Goal"];
+  const steps = ["Dietary", "Allergies", "Health", "Goal"];
 
   // Prefill if exists
   useEffect(() => {
@@ -48,8 +47,13 @@ function Onboarding() {
         if (!data) return;
         setDietary(data.dietary_restrictions ?? []);
         setAllergies(data.allergies ?? []);
-        setHealth(data.health_conditions ?? []);
-        setGlp1(data.glp1_user ?? false);
+        const h = data.health_conditions ?? [];
+        // If glp1_user was set previously, ensure the option appears in the Health list
+        const withGlp1 =
+          data.glp1_user && !h.includes(HEALTH_GLP1_OPTION)
+            ? [...h, HEALTH_GLP1_OPTION]
+            : h;
+        setHealth(withGlp1);
         setGoal(data.eating_goal ?? "");
       });
   }, [user]);
@@ -73,7 +77,7 @@ function Onboarding() {
         dietary_restrictions: mergedDietary,
         allergies: mergedAllergies,
         health_conditions: mergedHealth,
-        glp1_user: glp1,
+        glp1_user: health.includes(HEALTH_GLP1_OPTION),
         eating_goal: goal,
       });
       if (pErr) throw pErr;
@@ -163,14 +167,6 @@ function Onboarding() {
           </Step>
         )}
         {step === 3 && (
-          <Step
-            title="Are you on a GLP-1 medication?"
-            sub="Like Ozempic, Wegovy, or Mounjaro. We'll prioritize balanced, lower-volume meals."
-          >
-            <Glp1Toggle value={glp1} onChange={setGlp1} />
-          </Step>
-        )}
-        {step === 4 && (
           <Step title="What's your eating goal?">
             <GoalRadio value={goal} onChange={setGoal} />
           </Step>

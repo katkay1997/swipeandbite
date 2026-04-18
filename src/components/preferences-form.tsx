@@ -26,6 +26,7 @@ export const ALLERGENS = [
   "Wheat",
   "Sesame",
 ];
+export const HEALTH_GLP1_OPTION = "On a GLP-1 (Ozempic, Wegovy, Mounjaro)";
 export const HEALTH = [
   "None",
   "Diabetes",
@@ -41,6 +42,7 @@ export const HEALTH = [
   "Thyroid condition",
   "PCOS",
   "Acid reflux / GERD",
+  HEALTH_GLP1_OPTION,
 ];
 export const GOALS = [
   "Lose weight",
