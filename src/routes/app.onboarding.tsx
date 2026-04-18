@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth-context";
+import { getDeviceId } from "@/lib/device-id";
 import {
   ALLERGENS,
   CheckGroup,
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/app/onboarding")({
 });
 
 function Onboarding() {
-  const { user } = useAuth();
+  const userId = getDeviceId();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -37,18 +37,16 @@ function Onboarding() {
 
   // Prefill if exists
   useEffect(() => {
-    if (!user) return;
     supabase
       .from("preferences")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .maybeSingle()
       .then(({ data }) => {
         if (!data) return;
         setDietary(data.dietary_restrictions ?? []);
         setAllergies(data.allergies ?? []);
         const h = data.health_conditions ?? [];
-        // If glp1_user was set previously, ensure the option appears in the Health list
         const withGlp1 =
           data.glp1_user && !h.includes(HEALTH_GLP1_OPTION)
             ? [...h, HEALTH_GLP1_OPTION]
@@ -56,10 +54,9 @@ function Onboarding() {
         setHealth(withGlp1);
         setGoal(data.eating_goal ?? "");
       });
-  }, [user]);
+  }, [userId]);
 
   async function finish() {
-    if (!user) return;
     setSaving(true);
     try {
       const mergedDietary = dietaryOther.trim()
@@ -73,7 +70,7 @@ function Onboarding() {
         : health;
 
       const { error: pErr } = await supabase.from("preferences").upsert({
-        user_id: user.id,
+        user_id: userId,
         dietary_restrictions: mergedDietary,
         allergies: mergedAllergies,
         health_conditions: mergedHealth,
@@ -85,7 +82,7 @@ function Onboarding() {
       const { error: profErr } = await supabase
         .from("profiles")
         .update({ onboarding_complete: true })
-        .eq("id", user.id);
+        .eq("id", userId);
       if (profErr) throw profErr;
 
       toast.success("All set! Let's find your match.");

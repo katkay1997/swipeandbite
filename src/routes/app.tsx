@@ -1,42 +1,49 @@
 import { createFileRoute, Outlet, useNavigate, Link, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Heart, ChefHat, MapPin, Utensils, Settings as SettingsIcon, LogOut } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
+import { Heart, ChefHat, MapPin, Utensils, Settings as SettingsIcon } from "lucide-react";
 import { Logo } from "@/components/Logo";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { getDeviceId } from "@/lib/device-id";
 
 export const Route = createFileRoute("/app")({
   component: AppLayout,
 });
 
 function AppLayout() {
-  const { user, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    if (loading) return;
-    if (!user) {
-      navigate({ to: "/auth" });
-      return;
-    }
-    // Check onboarding
+    const id = getDeviceId();
     (async () => {
+      // Ensure profile row exists for this device
       const { data } = await supabase
         .from("profiles")
         .select("onboarding_complete")
-        .eq("id", user.id)
+        .eq("id", id)
         .maybeSingle();
-      if (data && !data.onboarding_complete && !location.pathname.startsWith("/app/onboarding") && !location.pathname.startsWith("/app/settings")) {
+      if (!data) {
+        await supabase.from("profiles").insert({ id, onboarding_complete: false });
+        await supabase.from("preferences").insert({ user_id: id });
+        if (
+          !location.pathname.startsWith("/app/onboarding") &&
+          !location.pathname.startsWith("/app/settings")
+        ) {
+          navigate({ to: "/app/onboarding" });
+        }
+      } else if (
+        !data.onboarding_complete &&
+        !location.pathname.startsWith("/app/onboarding") &&
+        !location.pathname.startsWith("/app/settings")
+      ) {
         navigate({ to: "/app/onboarding" });
       }
       setChecking(false);
     })();
-  }, [user, loading, navigate, location.pathname]);
+  }, [navigate, location.pathname]);
 
-  if (loading || checking) {
+  if (checking) {
     return (
       <div className="grid min-h-screen place-items-center" style={{ background: "var(--gradient-soft)" }}>
         <div className="text-muted-foreground">Loading…</div>
@@ -50,18 +57,6 @@ function AppLayout() {
     <div className="min-h-screen pb-20" style={{ background: "var(--gradient-soft)" }}>
       <header className="mx-auto flex max-w-2xl items-center justify-between px-5 py-4">
         <Logo size="sm" />
-        {!isOnboarding && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={async () => {
-              await signOut();
-              navigate({ to: "/" });
-            }}
-          >
-            <LogOut size={16} /> Sign out
-          </Button>
-        )}
       </header>
       <main className="mx-auto max-w-2xl px-5">
         <Outlet />

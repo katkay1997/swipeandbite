@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth-context";
+import { getDeviceId } from "@/lib/device-id";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -38,25 +38,24 @@ export const Route = createFileRoute("/app/match/$id")({
 
 function MatchDetailPage() {
   const { id } = Route.useParams();
-  const { user } = useAuth();
+  const userId = getDeviceId();
   const navigate = useNavigate();
   const [match, setMatch] = useState<MatchRow | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) return;
     (async () => {
       setLoading(true);
       const { data } = await supabase
         .from("matches")
         .select("*, meal:meals(*)")
         .eq("id", id)
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .maybeSingle();
       setMatch((data as MatchRow) ?? null);
       setLoading(false);
     })();
-  }, [user, id]);
+  }, [userId, id]);
 
   if (loading) {
     return (
@@ -81,8 +80,8 @@ function MatchDetailPage() {
   const isCook = match.mode === "cook";
 
   async function markAte() {
-    if (!user || !meal) return;
-    const { error } = await supabase.from("pins").insert({ user_id: user.id, meal_id: meal.id });
+    if (!meal) return;
+    const { error } = await supabase.from("pins").insert({ user_id: userId, meal_id: meal.id });
     if (error) {
       toast.error("Couldn't log it");
       return;

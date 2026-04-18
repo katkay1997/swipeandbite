@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth-context";
+import { getDeviceId } from "@/lib/device-id";
 import { getA11y, setColorBlind, setReduceMotion } from "@/lib/a11y";
 import { Camera, Mail } from "lucide-react";
 import {
@@ -36,7 +36,7 @@ function splitOther(values: string[] | null | undefined) {
 }
 
 function Settings() {
-  const { user } = useAuth();
+  const userId = getDeviceId();
   const [displayName, setName] = useState("");
   const [bio, setBio] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
@@ -57,11 +57,10 @@ function Settings() {
     const a = getA11y();
     setCb(a.colorBlind);
     setRm(a.reduceMotion);
-    if (!user) return;
     supabase
       .from("profiles")
       .select("display_name, food_bio, avatar_url, color_blind, reduce_motion")
-      .eq("id", user.id)
+      .eq("id", userId)
       .maybeSingle()
       .then(({ data }) => {
         if (!data) return;
@@ -72,7 +71,7 @@ function Settings() {
     supabase
       .from("preferences")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .maybeSingle()
       .then(({ data }) => {
         if (!data) return;
@@ -91,13 +90,13 @@ function Settings() {
         setHealthOther(h.other);
         setGoal(data.eating_goal ?? "");
       });
-  }, [user]);
+  }, [userId]);
 
   async function uploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
     const ext = file.name.split(".").pop();
-    const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+    const path = `${userId}/avatar-${Date.now()}.${ext}`;
     const { error } = await supabase.storage
       .from("avatars")
       .upload(path, file, { upsert: true });
@@ -110,12 +109,11 @@ function Settings() {
     await supabase
       .from("profiles")
       .update({ avatar_url: data.publicUrl })
-      .eq("id", user.id);
+      .eq("id", userId);
     toast.success("Avatar updated");
   }
 
   async function save() {
-    if (!user) return;
     setSaving(true);
     try {
       const mergedDietary = dietaryOther.trim()
@@ -136,11 +134,11 @@ function Settings() {
           color_blind: cb,
           reduce_motion: rm,
         })
-        .eq("id", user.id);
+        .eq("id", userId);
       if (profErr) throw profErr;
 
       const { error: prefErr } = await supabase.from("preferences").upsert({
-        user_id: user.id,
+        user_id: userId,
         dietary_restrictions: mergedDietary,
         allergies: mergedAllergies,
         health_conditions: mergedHealth,

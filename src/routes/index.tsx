@@ -1,9 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
 import { ArrowRight, Heart, ChefHat, MapPin, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
-import { useAuth } from "@/lib/auth-context";
 import heroImg from "@/assets/hero-meal.jpg";
 
 export const Route = createFileRoute("/")({
@@ -26,34 +24,22 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { user, loading } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && user) {
-      navigate({ to: "/app/mode" });
-    }
-  }, [user, loading, navigate]);
 
   return (
     <div className="min-h-screen" style={{ background: "var(--gradient-soft)" }}>
-      {/* Header */}
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <Logo />
         <nav className="flex items-center gap-2">
           <Link to="/contact" className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline">
             Contact
           </Link>
-          <Link to="/auth">
-            <Button variant="ghost" size="sm">Sign in</Button>
-          </Link>
-          <Link to="/auth" search={{ mode: "signup" }}>
-            <Button size="sm" className="rounded-full">Get started</Button>
-          </Link>
+          <Button size="sm" className="rounded-full" onClick={() => navigate({ to: "/app/mode" })}>
+            Open app
+          </Button>
         </nav>
       </header>
 
-      {/* Hero */}
       <section className="mx-auto grid max-w-6xl gap-10 px-6 pb-16 pt-8 lg:grid-cols-2 lg:gap-16 lg:pt-16">
         <div className="flex flex-col justify-center">
           <span className="mb-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-medium text-primary">
@@ -74,16 +60,13 @@ function Index() {
             order takeout — all tailored to your dietary preferences.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/auth" search={{ mode: "signup" }}>
-              <Button size="lg" className="rounded-full text-base">
-                Find my match <ArrowRight className="ml-1" size={18} />
-              </Button>
-            </Link>
-            <Link to="/auth">
-              <Button size="lg" variant="outline" className="rounded-full text-base">
-                I have an account
-              </Button>
-            </Link>
+            <Button
+              size="lg"
+              className="rounded-full text-base"
+              onClick={() => navigate({ to: "/app/mode" })}
+            >
+              Find my match <ArrowRight className="ml-1" size={18} />
+            </Button>
           </div>
 
           <div className="mt-10 grid grid-cols-3 gap-4 max-w-md">
@@ -110,7 +93,6 @@ function Index() {
         </div>
       </section>
 
-      {/* How it works */}
       <section className="mx-auto max-w-6xl px-6 pb-20">
         <h2 className="mb-8 text-center text-3xl font-bold tracking-tight">How it works</h2>
         <div className="grid gap-6 sm:grid-cols-3">

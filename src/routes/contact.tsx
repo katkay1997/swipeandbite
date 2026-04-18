@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth-context";
+
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -20,8 +20,7 @@ export const Route = createFileRoute("/contact")({
 });
 
 function Contact() {
-  const { user } = useAuth();
-  const [email, setEmail] = useState(user?.email ?? "");
+  const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +30,7 @@ function Contact() {
     const { error } = await supabase.from("contact_messages").insert({
       email,
       message,
-      user_id: user?.id ?? null,
+      user_id: null,
     });
     setLoading(false);
     if (error) toast.error(error.message);
@@ -66,11 +65,6 @@ function Contact() {
           <Button type="submit" disabled={loading} className="mt-4 w-full rounded-full">
             {loading ? "Sending…" : "Send"}
           </Button>
-          {!user && (
-            <p className="mt-3 text-center text-xs text-muted-foreground">
-              You'll need to <Link to="/auth" className="underline">sign in</Link> first.
-            </p>
-          )}
         </form>
       </main>
     </div>
