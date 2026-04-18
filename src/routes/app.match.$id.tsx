@@ -10,6 +10,7 @@ import {
   Loader2,
   Sparkles,
   Search,
+  Utensils,
 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
@@ -79,6 +80,17 @@ function MatchDetailPage() {
   const meal = match.meal;
   const isCook = match.mode === "cook";
 
+  async function markAte() {
+    if (!user || !meal) return;
+    const { error } = await supabase.from("pins").insert({ user_id: user.id, meal_id: meal.id });
+    if (error && !error.message.toLowerCase().includes("duplicate")) {
+      toast.error("Couldn't log it");
+      return;
+    }
+    toast.success("Logged to Ate");
+    navigate({ to: "/app/ate" });
+  }
+
   return (
     <div className="pb-20">
       <div className="-mx-4 sm:mx-0">
@@ -114,6 +126,16 @@ function MatchDetailPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="mt-4 px-1">
+        <Button
+          onClick={markAte}
+          className="w-full gap-2"
+          style={{ background: "var(--gradient-warm)", color: "white" }}
+        >
+          <Utensils size={16} /> Ate it
+        </Button>
       </div>
 
       {isCook ? <CookView meal={meal} /> : <TakeoutView meal={meal} />}

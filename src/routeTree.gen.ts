@@ -17,10 +17,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as LegalDisclaimerRouteImport } from './routes/legal.disclaimer'
 import { Route as AppSwipeRouteImport } from './routes/app.swipe'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
-import { Route as AppPinnedRouteImport } from './routes/app.pinned'
 import { Route as AppOnboardingRouteImport } from './routes/app.onboarding'
 import { Route as AppModeRouteImport } from './routes/app.mode'
 import { Route as AppMatchesRouteImport } from './routes/app.matches'
+import { Route as AppAteRouteImport } from './routes/app.ate'
 import { Route as AppMatchIdRouteImport } from './routes/app.match.$id'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -63,11 +63,6 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
-const AppPinnedRoute = AppPinnedRouteImport.update({
-  id: '/pinned',
-  path: '/pinned',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppOnboardingRoute = AppOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -83,6 +78,11 @@ const AppMatchesRoute = AppMatchesRouteImport.update({
   path: '/matches',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAteRoute = AppAteRouteImport.update({
+  id: '/ate',
+  path: '/ate',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMatchIdRoute = AppMatchIdRouteImport.update({
   id: '/match/$id',
   path: '/match/$id',
@@ -95,10 +95,10 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/app/ate': typeof AppAteRoute
   '/app/matches': typeof AppMatchesRoute
   '/app/mode': typeof AppModeRoute
   '/app/onboarding': typeof AppOnboardingRoute
-  '/app/pinned': typeof AppPinnedRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/swipe': typeof AppSwipeRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
@@ -110,10 +110,10 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/app/ate': typeof AppAteRoute
   '/app/matches': typeof AppMatchesRoute
   '/app/mode': typeof AppModeRoute
   '/app/onboarding': typeof AppOnboardingRoute
-  '/app/pinned': typeof AppPinnedRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/swipe': typeof AppSwipeRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
@@ -126,10 +126,10 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/app/ate': typeof AppAteRoute
   '/app/matches': typeof AppMatchesRoute
   '/app/mode': typeof AppModeRoute
   '/app/onboarding': typeof AppOnboardingRoute
-  '/app/pinned': typeof AppPinnedRoute
   '/app/settings': typeof AppSettingsRoute
   '/app/swipe': typeof AppSwipeRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
@@ -143,10 +143,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/reset-password'
+    | '/app/ate'
     | '/app/matches'
     | '/app/mode'
     | '/app/onboarding'
-    | '/app/pinned'
     | '/app/settings'
     | '/app/swipe'
     | '/legal/disclaimer'
@@ -158,10 +158,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/reset-password'
+    | '/app/ate'
     | '/app/matches'
     | '/app/mode'
     | '/app/onboarding'
-    | '/app/pinned'
     | '/app/settings'
     | '/app/swipe'
     | '/legal/disclaimer'
@@ -173,10 +173,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/reset-password'
+    | '/app/ate'
     | '/app/matches'
     | '/app/mode'
     | '/app/onboarding'
-    | '/app/pinned'
     | '/app/settings'
     | '/app/swipe'
     | '/legal/disclaimer'
@@ -250,13 +250,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/pinned': {
-      id: '/app/pinned'
-      path: '/pinned'
-      fullPath: '/app/pinned'
-      preLoaderRoute: typeof AppPinnedRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/app/onboarding': {
       id: '/app/onboarding'
       path: '/onboarding'
@@ -278,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMatchesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/ate': {
+      id: '/app/ate'
+      path: '/ate'
+      fullPath: '/app/ate'
+      preLoaderRoute: typeof AppAteRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/match/$id': {
       id: '/app/match/$id'
       path: '/match/$id'
@@ -289,20 +289,20 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppAteRoute: typeof AppAteRoute
   AppMatchesRoute: typeof AppMatchesRoute
   AppModeRoute: typeof AppModeRoute
   AppOnboardingRoute: typeof AppOnboardingRoute
-  AppPinnedRoute: typeof AppPinnedRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppSwipeRoute: typeof AppSwipeRoute
   AppMatchIdRoute: typeof AppMatchIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAteRoute: AppAteRoute,
   AppMatchesRoute: AppMatchesRoute,
   AppModeRoute: AppModeRoute,
   AppOnboardingRoute: AppOnboardingRoute,
-  AppPinnedRoute: AppPinnedRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppSwipeRoute: AppSwipeRoute,
   AppMatchIdRoute: AppMatchIdRoute,

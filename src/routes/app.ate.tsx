@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Bookmark, Trash2 } from "lucide-react";
+import { Utensils, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
@@ -9,11 +9,11 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type PinRow = Tables<"pins"> & { meal: Tables<"meals"> | null };
 
-export const Route = createFileRoute("/app/pinned")({
-  component: PinnedPage,
+export const Route = createFileRoute("/app/ate")({
+  component: AtePage,
 });
 
-function PinnedPage() {
+function AtePage() {
   const { user } = useAuth();
   const [rows, setRows] = useState<PinRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +34,7 @@ function PinnedPage() {
   async function remove(id: string) {
     await supabase.from("pins").delete().eq("id", id);
     setRows((r) => r.filter((x) => x.id !== id));
-    toast.success("Unpinned");
+    toast.success("Removed");
   }
 
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading…</div>;
@@ -42,11 +42,11 @@ function PinnedPage() {
   if (rows.length === 0) {
     return (
       <div className="py-12 text-center">
-        <Bookmark className="mx-auto mb-3 text-muted-foreground" />
-        <h1 className="text-2xl font-bold">Nothing pinned</h1>
-        <p className="mt-2 text-muted-foreground">Tap the bookmark while swiping to save meals.</p>
-        <Link to="/app/mode" className="mt-5 inline-block">
-          <Button style={{ background: "var(--gradient-warm)", color: "white" }}>Start swiping</Button>
+        <Utensils className="mx-auto mb-3 text-muted-foreground" />
+        <h1 className="text-2xl font-bold">Nothing eaten yet</h1>
+        <p className="mt-2 text-muted-foreground">Open a match and tap "Ate" to log it here.</p>
+        <Link to="/app/matches" className="mt-5 inline-block">
+          <Button style={{ background: "var(--gradient-warm)", color: "white" }}>View matches</Button>
         </Link>
       </div>
     );
@@ -54,7 +54,8 @@ function PinnedPage() {
 
   return (
     <div className="py-6">
-      <h1 className="text-2xl font-bold">Pinned for later</h1>
+      <h1 className="text-2xl font-bold">Ate</h1>
+      <p className="mt-1 text-sm text-muted-foreground">{rows.length} meals logged</p>
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         {rows.map((p) => (
           <article
@@ -74,7 +75,7 @@ function PinnedPage() {
             </div>
             <button
               type="button"
-              aria-label="Unpin"
+              aria-label="Remove"
               onClick={() => remove(p.id)}
               className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100"
             >
