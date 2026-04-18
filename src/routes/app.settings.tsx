@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { getA11y, setColorBlind, setReduceMotion } from "@/lib/a11y";
-import { Camera } from "lucide-react";
+import { Camera, Mail } from "lucide-react";
 import {
   ALLERGENS,
   CheckGroup,
