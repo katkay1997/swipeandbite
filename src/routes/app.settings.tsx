@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { getA11y, setColorBlind, setReduceMotion } from "@/lib/a11y";
-import { Camera } from "lucide-react";
+import { Camera, Mail } from "lucide-react";
 import {
   ALLERGENS,
   CheckGroup,
@@ -312,6 +312,22 @@ function Settings() {
       >
         {saving ? "Saving…" : "Save changes"}
       </Button>
+
+      <section
+        className="mt-4 rounded-3xl bg-card p-5"
+        style={{ boxShadow: "var(--shadow-card)" }}
+      >
+        <h2 className="font-semibold">Support</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Questions, feedback, or issues? We'd love to hear from you.
+        </p>
+        <Link to="/contact" className="mt-3 block">
+          <Button variant="outline" className="w-full rounded-full">
+            <Mail size={16} className="mr-2" />
+            Contact us
+          </Button>
+        </Link>
+      </section>
     </div>
   );
 }
