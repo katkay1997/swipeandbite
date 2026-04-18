@@ -306,13 +306,17 @@ function TakeoutView({ meal }: { meal: Tables<"meals"> }) {
     if (saved) setLocation(saved);
   }, []);
 
-  const query = encodeURIComponent(meal.name);
+  const dishQuery = encodeURIComponent(`${meal.name} takeout`);
+  const mapsQuery = encodeURIComponent(
+    location.trim() ? `${meal.name} takeout near ${location.trim()}` : `${meal.name} takeout near me`,
+  );
   const deepLinks = [
-    { name: "Uber Eats", href: `https://www.ubereats.com/search?q=${query}` },
-    { name: "DoorDash", href: `https://www.doordash.com/search/store/${query}` },
-    { name: "Grubhub", href: `https://www.grubhub.com/search?queryText=${query}` },
-    { name: "Google Maps", href: `https://www.google.com/maps/search/${query}+near+me` },
+    { name: "Uber Eats", href: `https://www.ubereats.com/search?q=${dishQuery}` },
+    { name: "DoorDash", href: `https://www.doordash.com/search/store/${dishQuery}` },
+    { name: "Grubhub", href: `https://www.grubhub.com/search?queryText=${dishQuery}` },
+    { name: "Google Maps", href: `https://www.google.com/maps/search/?api=1&query=${mapsQuery}` },
   ];
+
 
   async function runSearch(e?: React.FormEvent) {
     e?.preventDefault();

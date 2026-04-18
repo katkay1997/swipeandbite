@@ -138,7 +138,7 @@ export const searchTakeoutNearby = createServerFn({ method: "POST" })
     if (!TAVILY_API_KEY) {
       return { results: [], error: "Takeout search not configured" };
     }
-    const query = `Best restaurants serving ${data.mealName}${data.cuisine ? ` (${data.cuisine})` : ""} near ${data.location}. Include name, address, and rating if possible.`;
+    const query = `${data.mealName}${data.cuisine ? ` (${data.cuisine})` : ""} takeout OR delivery near ${data.location}. List restaurants that offer takeout or delivery (not dine-in only). Include name, address, and a link to order if possible.`;
     try {
       const res = await fetch("https://api.tavily.com/search", {
         method: "POST",
