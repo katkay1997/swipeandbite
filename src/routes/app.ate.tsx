@@ -9,7 +9,7 @@ import type { Tables } from "@/integrations/supabase/types";
 
 type PinRow = Tables<"pins"> & { meal: Tables<"meals"> | null };
 
-export const Route = createFileRoute("/app/pinned")({
+export const Route = createFileRoute("/app/ate")({
   component: PinnedPage,
 });
 
