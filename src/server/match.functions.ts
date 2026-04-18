@@ -110,8 +110,12 @@ export const estimateMealNutrition = createServerFn({ method: "POST" })
 
       return { nutrition: parsed.data, error: null, cached: false };
     } catch (e) {
-      console.error("estimateMealNutrition error", e);
+      console.error("estimateMealNutrition AI error", e);
       return { nutrition: null, error: e instanceof Error ? e.message : "Unknown error" };
+    }
+    } catch (outer) {
+      console.error("estimateMealNutrition outer error", outer);
+      return { nutrition: null, error: outer instanceof Error ? outer.message : "Unknown error" };
     }
   });
 
