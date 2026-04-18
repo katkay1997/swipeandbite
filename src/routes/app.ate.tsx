@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Utensils, Trash2, Flame } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
+import { estimateMealNutrition } from "@/server/match.functions";
 
 type PinRow = Tables<"pins"> & { meal: Tables<"meals"> | null };
 type Nutrition = {
@@ -23,7 +25,7 @@ function mealSlotForDate(d: Date): "breakfast" | "lunch" | "dinner" {
   const h = d.getHours();
   if (h >= 5 && h < 12) return "breakfast";
   if (h >= 12 && h < 18) return "lunch";
-  return "dinner"; // 18:00–04:59
+  return "dinner";
 }
 
 function isToday(iso: string) {
@@ -36,10 +38,17 @@ function isToday(iso: string) {
   );
 }
 
+function hasNutrition(n: unknown): n is Nutrition {
+  return !!n && typeof n === "object" && typeof (n as Nutrition).calories === "number";
+}
+
 function AtePage() {
   const { user } = useAuth();
+  const estimate = useServerFn(estimateMealNutrition);
   const [rows, setRows] = useState<PinRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [estimates, setEstimates] = useState<Record<string, Nutrition>>({});
+  const [estimating, setEstimating] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -54,27 +63,51 @@ function AtePage() {
     })();
   }, [user]);
 
-  async function remove(id: string) {
-    await supabase.from("pins").delete().eq("id", id);
-    setRows((r) => r.filter((x) => x.id !== id));
-    toast.success("Removed");
-  }
-
   const today = useMemo(() => rows.filter((r) => isToday(r.created_at)), [rows]);
 
-  const totals = useMemo(() => {
-    return today.reduce(
-      (acc, r) => {
-        const n = (r.meal?.nutrition ?? {}) as Nutrition;
-        acc.calories += Math.round(n.calories ?? 0);
-        acc.protein += Math.round(n.protein_g ?? 0);
-        acc.carbs += Math.round(n.carbs_g ?? 0);
-        acc.fat += Math.round(n.fat_g ?? 0);
-        return acc;
-      },
-      { calories: 0, protein: 0, carbs: 0, fat: 0 },
+  // Estimate nutrition for today's meals that don't have it yet
+  useEffect(() => {
+    if (today.length === 0) return;
+    const missing = today.filter(
+      (r) => r.meal && !hasNutrition(r.meal.nutrition) && !estimates[r.meal.id],
     );
-  }, [today]);
+    if (missing.length === 0) return;
+    let cancelled = false;
+    setEstimating(true);
+    (async () => {
+      for (const r of missing) {
+        if (cancelled || !r.meal) break;
+        try {
+          const res = await estimate({ data: { mealId: r.meal.id } });
+          if (!cancelled && res.nutrition) {
+            setEstimates((prev) => ({ ...prev, [r.meal!.id]: res.nutrition as Nutrition }));
+          }
+        } catch {
+          // ignore individual failures
+        }
+      }
+      if (!cancelled) setEstimating(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [today, estimate, estimates]);
+
+  const totals = useMemo(() => {
+    const acc = { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    for (const r of today) {
+      if (!r.meal) continue;
+      const n = hasNutrition(r.meal.nutrition)
+        ? (r.meal.nutrition as Nutrition)
+        : estimates[r.meal.id];
+      if (!n) continue;
+      acc.calories += Math.round(n.calories ?? 0);
+      acc.protein += Math.round(n.protein_g ?? 0);
+      acc.carbs += Math.round(n.carbs_g ?? 0);
+      acc.fat += Math.round(n.fat_g ?? 0);
+    }
+    return acc;
+  }, [today, estimates]);
 
   const grouped = useMemo(() => {
     const g: Record<"breakfast" | "lunch" | "dinner", PinRow[]> = {
@@ -85,6 +118,12 @@ function AtePage() {
     for (const r of today) g[mealSlotForDate(new Date(r.created_at))].push(r);
     return g;
   }, [today]);
+
+  async function remove(id: string) {
+    await supabase.from("pins").delete().eq("id", id);
+    setRows((r) => r.filter((x) => x.id !== id));
+    toast.success("Removed");
+  }
 
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading…</div>;
 
@@ -108,7 +147,6 @@ function AtePage() {
         {rows.length} total · {today.length} today
       </p>
 
-      {/* Today's totals */}
       <section
         className="mt-4 rounded-2xl p-4 text-white"
         style={{ background: "var(--gradient-warm)", boxShadow: "var(--shadow-card)" }}
@@ -123,12 +161,13 @@ function AtePage() {
           <Stat label="carbs" value={`${totals.carbs}g`} />
           <Stat label="fat" value={`${totals.fat}g`} />
         </div>
-        {today.length === 0 && (
+        {today.length === 0 ? (
           <p className="mt-2 text-xs opacity-90">Log a meal today to see your totals.</p>
-        )}
+        ) : estimating ? (
+          <p className="mt-2 text-xs opacity-90">Estimating nutrition…</p>
+        ) : null}
       </section>
 
-      {/* Today by meal time */}
       {today.length > 0 && (
         <div className="mt-6 space-y-5">
           {(["breakfast", "lunch", "dinner"] as const).map((slot) =>
@@ -144,7 +183,6 @@ function AtePage() {
         </div>
       )}
 
-      {/* All history */}
       <h3 className="mb-2 mt-6 text-sm font-semibold text-muted-foreground">All history</h3>
       <PinGrid rows={rows} onRemove={remove} />
     </div>
