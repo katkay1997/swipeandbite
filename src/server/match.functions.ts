@@ -22,15 +22,16 @@ export const estimateMealNutrition = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { mealId: string }) => z.object({ mealId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    const { data: meal, error } = await supabase
-      .from("meals")
-      .select("id,name,cuisine,ingredients,nutrition,calories,macros")
-      .eq("id", data.mealId)
-      .single();
-    if (error || !meal) {
-      return { nutrition: null, error: "Meal not found" };
-    }
+    try {
+      const { supabase } = context;
+      const { data: meal, error } = await supabase
+        .from("meals")
+        .select("id,name,cuisine,ingredients,nutrition,calories,macros")
+        .eq("id", data.mealId)
+        .single();
+      if (error || !meal) {
+        return { nutrition: null, error: "Meal not found" };
+      }
 
     // Return cached if present
     const cached = meal.nutrition as Partial<Nutrition> | null;
