@@ -142,7 +142,6 @@ function Settings() {
       const { error: prefErr } = await supabase.from("preferences").upsert({
         user_id: user.id,
         dietary_restrictions: mergedDietary,
-        dietary_restrictions: mergedDietary,
         allergies: mergedAllergies,
         health_conditions: mergedHealth,
         glp1_user: health.includes(HEALTH_GLP1_OPTION),
