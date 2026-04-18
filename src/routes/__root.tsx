@@ -1,6 +1,10 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
+import { AuthProvider } from "@/lib/auth-context";
+import { applyA11y } from "@/lib/a11y";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -29,14 +33,20 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "SwipeBite — Find your next meal match" },
+      {
+        name: "description",
+        content:
+          "Swipe right on your next meal. Tinder-style food discovery — cook at home or order takeout, tailored to your preferences.",
+      },
+      { name: "author", content: "SwipeBite" },
+      { property: "og:title", content: "SwipeBite — Find your next meal match" },
+      {
+        property: "og:description",
+        content: "Swipe right on your next meal. Cook or takeout, tailored to you.",
+      },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       {
@@ -65,5 +75,13 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return <Outlet />;
+  useEffect(() => {
+    applyA11y();
+  }, []);
+  return (
+    <AuthProvider>
+      <Outlet />
+      <Toaster position="top-center" richColors />
+    </AuthProvider>
+  );
 }
