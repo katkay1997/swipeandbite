@@ -5,6 +5,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -45,6 +56,17 @@ function MatchesPage() {
     toast.success("Removed");
   }
 
+  async function clearAll() {
+    if (!user) return;
+    const { error } = await supabase.from("matches").delete().eq("user_id", user.id);
+    if (error) {
+      toast.error("Couldn't clear matches");
+      return;
+    }
+    setRows([]);
+    toast.success("All matches cleared");
+  }
+
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading…</div>;
 
   if (rows.length === 0) {
@@ -62,8 +84,31 @@ function MatchesPage() {
 
   return (
     <div className="py-6">
-      <h1 className="text-2xl font-bold">Your matches</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{rows.length} saved meals</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Your matches</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{rows.length} saved meals</p>
+        </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <Trash2 size={14} /> Clear all
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Clear all matches?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This removes every match from both Cook and Takeout. You can't undo this.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={clearAll}>Clear all</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as "cook" | "takeout")} className="mt-4">
         <TabsList className="grid w-full grid-cols-2">
