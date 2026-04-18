@@ -154,7 +154,7 @@ function AtePage() {
           <Flame size={14} className="opacity-90" />
         </div>
         <div className="mt-2 grid grid-cols-4 gap-2 text-center">
-          <Stat label="kcal" value={totals.calories.toString()} />
+          <Stat label="cal" value={totals.calories.toString()} />
           <Stat label="protein" value={`${totals.protein}g`} />
           <Stat label="carbs" value={`${totals.carbs}g`} />
           <Stat label="fat" value={`${totals.fat}g`} />
