@@ -51,7 +51,15 @@ function SwipePage() {
         setLoading(false);
         return;
       }
-      const fresh = (meals || []).filter((m) => !swipedIds.has(m.id));
+      // Filter by current meal time: 5–11:59 breakfast, 12–17:59 lunch, 18–4:59 dinner
+      const h = new Date().getHours();
+      const slot = h >= 5 && h < 12 ? "breakfast" : h >= 12 && h < 18 ? "lunch" : "dinner";
+      const all = (meals || []).filter((m) => !swipedIds.has(m.id));
+      const slotMatched = all.filter(
+        (m) => Array.isArray(m.meal_time) && m.meal_time.includes(slot),
+      );
+      // Fall back to all meals if we don't have enough tagged ones
+      const fresh = slotMatched.length >= 5 ? slotMatched : all;
       // shuffle
       for (let i = fresh.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
