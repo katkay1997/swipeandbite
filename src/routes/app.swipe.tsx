@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo } from "framer-motion";
-import { Heart, X, Undo2, Bookmark, Clock, Flame, ChefHat, MapPin, Sparkles } from "lucide-react";
+import { Heart, X, Undo2, Clock, Flame, ChefHat, MapPin, Sparkles } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -110,12 +110,6 @@ function SwipePage() {
     if (last.matchId) await supabase.from("matches").delete().eq("id", last.matchId);
   }
 
-  async function handlePin(meal: Meal) {
-    if (!user) return;
-    const { error } = await supabase.from("pins").insert({ user_id: user.id, meal_id: meal.id });
-    if (error) toast.error("Already pinned"); else toast.success("Pinned for later");
-  }
-
   if (loading) {
     return (
       <div className="grid place-items-center py-20 text-muted-foreground">
@@ -179,13 +173,6 @@ function SwipePage() {
         </ActionBtn>
         <ActionBtn label="Rewind" variant="ghost" onClick={handleRewind}>
           <Undo2 size={18} />
-        </ActionBtn>
-        <ActionBtn
-          label="Pin"
-          variant="ghost"
-          onClick={() => deck[deck.length - 1] && handlePin(deck[deck.length - 1])}
-        >
-          <Bookmark size={18} />
         </ActionBtn>
         <ActionBtn label="Yum" variant="primary" onClick={() => handleSwipe("right")}>
           <Heart size={22} />

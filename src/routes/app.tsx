@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet, useNavigate, Link, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Heart, ChefHat, MapPin, Bookmark, Settings as SettingsIcon, LogOut } from "lucide-react";
+import { Heart, ChefHat, MapPin, Utensils, Settings as SettingsIcon, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
@@ -75,7 +75,7 @@ function BottomNav() {
   const items = [
     { to: "/app/mode", icon: <Heart size={20} />, label: "Match" },
     { to: "/app/matches", icon: <ChefHat size={20} />, label: "Matches" },
-    { to: "/app/pinned", icon: <Bookmark size={20} />, label: "Pinned" },
+    { to: "/app/ate", icon: <Utensils size={20} />, label: "Ate" },
     { to: "/app/settings", icon: <SettingsIcon size={20} />, label: "Settings" },
   ] as const;
   return (
