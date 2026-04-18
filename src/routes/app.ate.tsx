@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Utensils, Trash2, Flame } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth-context";
+import { getDeviceId } from "@/lib/device-id";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
@@ -43,7 +43,7 @@ function hasNutrition(n: unknown): n is Nutrition {
 }
 
 function AtePage() {
-  const { user } = useAuth();
+  const userId = getDeviceId();
   const estimate = useServerFn(estimateMealNutrition);
   const [rows, setRows] = useState<PinRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,17 +51,16 @@ function AtePage() {
   const [estimating, setEstimating] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
     (async () => {
       const { data } = await supabase
         .from("pins")
         .select("*, meal:meals(*)")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .order("created_at", { ascending: false });
       setRows((data as PinRow[]) || []);
       setLoading(false);
     })();
-  }, [user]);
+  }, [userId]);
 
   const today = useMemo(() => rows.filter((r) => isToday(r.created_at)), [rows]);
 

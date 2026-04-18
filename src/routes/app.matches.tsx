@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Heart, Trash2, ChefHat, MapPin, Clock, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth-context";
+import { getDeviceId } from "@/lib/device-id";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -26,26 +26,25 @@ export const Route = createFileRoute("/app/matches")({
 });
 
 function MatchesPage() {
-  const { user } = useAuth();
+  const userId = getDeviceId();
   const [rows, setRows] = useState<MatchRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"cook" | "takeout">("cook");
 
   useEffect(() => {
-    if (!user) return;
     void load();
     async function load() {
       setLoading(true);
       const { data } = await supabase
         .from("matches")
         .select("*, meal:meals(*)")
-        .eq("user_id", user!.id)
+        .eq("user_id", userId)
         .eq("archived", false)
         .order("matched_at", { ascending: false });
       setRows((data as MatchRow[]) || []);
       setLoading(false);
     }
-  }, [user]);
+  }, [userId]);
 
   const cook = useMemo(() => rows.filter((r) => r.mode === "cook"), [rows]);
   const takeout = useMemo(() => rows.filter((r) => r.mode === "takeout"), [rows]);
@@ -57,8 +56,7 @@ function MatchesPage() {
   }
 
   async function clearAll() {
-    if (!user) return;
-    const { error } = await supabase.from("matches").delete().eq("user_id", user.id);
+    const { error } = await supabase.from("matches").delete().eq("user_id", userId);
     if (error) {
       toast.error("Couldn't clear matches");
       return;
