@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
 const NutritionSchema = z.object({
   calories: z.number(),
@@ -19,11 +20,12 @@ export type Nutrition = z.infer<typeof NutritionSchema>;
  * Caches the result on meals.nutrition so subsequent opens are instant + free.
  */
 export const estimateMealNutrition = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((input: { mealId: string }) => z.object({ mealId: z.string().uuid() }).parse(input))
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data }) => {
     try {
-      const { supabase } = context;
+      const SUPABASE_URL = process.env.SUPABASE_URL!;
+      const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY!;
+      const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
       const { data: meal, error } = await supabase
         .from("meals")
         .select("id,name,cuisine,ingredients,nutrition,calories,macros")
@@ -100,8 +102,6 @@ export const estimateMealNutrition = createServerFn({ method: "POST" })
       if (!parsed.success) return { nutrition: null, error: "Invalid nutrition format" };
 
       // Cache on the meal row (RLS: only admins can update meals; use service role)
-      const { createClient } = await import("@supabase/supabase-js");
-      const SUPABASE_URL = process.env.SUPABASE_URL!;
       const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
       if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
         const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -123,7 +123,6 @@ export const estimateMealNutrition = createServerFn({ method: "POST" })
  * Find nearby restaurants serving a meal/dish using Tavily search.
  */
 export const searchTakeoutNearby = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((input: { mealName: string; cuisine?: string; location: string }) =>
     z
       .object({
