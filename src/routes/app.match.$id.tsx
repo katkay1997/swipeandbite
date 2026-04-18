@@ -317,13 +317,6 @@ function TakeoutView({ meal }: { meal: Tables<"meals"> }) {
     { name: "Google Maps", href: `https://www.google.com/maps/search/?api=1&query=${mapsQuery}` },
   ];
 
-  const query = encodeURIComponent(meal.name);
-  const deepLinks = [
-    { name: "Uber Eats", href: `https://www.ubereats.com/search?q=${query}` },
-    { name: "DoorDash", href: `https://www.doordash.com/search/store/${query}` },
-    { name: "Grubhub", href: `https://www.grubhub.com/search?queryText=${query}` },
-    { name: "Google Maps", href: `https://www.google.com/maps/search/${query}+near+me` },
-  ];
 
   async function runSearch(e?: React.FormEvent) {
     e?.preventDefault();
