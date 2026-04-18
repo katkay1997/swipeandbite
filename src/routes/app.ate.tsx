@@ -143,9 +143,7 @@ function AtePage() {
   return (
     <div className="py-6">
       <h1 className="text-2xl font-bold">Ate</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {rows.length} total · {today.length} today
-      </p>
+      <p className="mt-1 text-sm text-muted-foreground">{today.length} today</p>
 
       <section
         className="mt-4 rounded-2xl p-4 text-white"
@@ -182,9 +180,6 @@ function AtePage() {
           )}
         </div>
       )}
-
-      <h3 className="mb-2 mt-6 text-sm font-semibold text-muted-foreground">All history</h3>
-      <PinGrid rows={rows} onRemove={remove} />
     </div>
   );
 }
