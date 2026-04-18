@@ -306,15 +306,30 @@ function TakeoutView({ meal }: { meal: Tables<"meals"> }) {
     if (saved) setLocation(saved);
   }, []);
 
-  const dishQuery = encodeURIComponent(`${meal.name} takeout`);
-  const mapsQuery = encodeURIComponent(
-    location.trim() ? `${meal.name} takeout near ${location.trim()}` : `${meal.name} takeout near me`,
-  );
+  const locSuffix = location.trim() ? ` ${location.trim()}` : "";
+  const dishQuery = encodeURIComponent(`${meal.name} takeout${locSuffix}`);
   const deepLinks = [
-    { name: "Uber Eats", href: `https://www.ubereats.com/search?q=${dishQuery}` },
-    { name: "DoorDash", href: `https://www.doordash.com/search/store/${dishQuery}` },
-    { name: "Grubhub", href: `https://www.grubhub.com/search?queryText=${dishQuery}` },
-    { name: "Google Maps", href: `https://www.google.com/maps/search/?api=1&query=${mapsQuery}` },
+    {
+      name: "Uber Eats",
+      href: `https://www.ubereats.com/search?q=${dishQuery}`,
+      bg: "#06C167",
+      fg: "#000000",
+      logo: "https://logo.clearbit.com/ubereats.com",
+    },
+    {
+      name: "DoorDash",
+      href: `https://www.doordash.com/search/store/${dishQuery}`,
+      bg: "#EB1700",
+      fg: "#FFFFFF",
+      logo: "https://logo.clearbit.com/doordash.com",
+    },
+    {
+      name: "Grubhub",
+      href: `https://www.grubhub.com/search?queryText=${dishQuery}`,
+      bg: "#FF8000",
+      fg: "#FFFFFF",
+      logo: "https://logo.clearbit.com/grubhub.com",
+    },
   ];
 
   async function runSearch(e?: React.FormEvent) {
@@ -351,17 +366,26 @@ function TakeoutView({ meal }: { meal: Tables<"meals"> }) {
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Order it on
         </h2>
-        <div className="mt-2 grid grid-cols-2 gap-2">
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
           {deepLinks.map((l) => (
             <a
               key={l.name}
               href={l.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-between rounded-xl border bg-background px-3 py-2 text-sm font-medium hover:bg-accent"
+              className="group inline-flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold shadow-sm transition-transform hover:scale-[1.02]"
+              style={{ backgroundColor: l.bg, color: l.fg }}
             >
-              {l.name}
-              <ExternalLink size={14} className="text-muted-foreground" />
+              <span className="flex items-center gap-2">
+                <img
+                  src={l.logo}
+                  alt=""
+                  className="h-5 w-5 rounded bg-white/90 object-contain p-0.5"
+                  loading="lazy"
+                />
+                {l.name}
+              </span>
+              <ExternalLink size={14} className="opacity-80" />
             </a>
           ))}
         </div>
