@@ -83,7 +83,7 @@ function MatchDetailPage() {
   async function markAte() {
     if (!user || !meal) return;
     const { error } = await supabase.from("pins").insert({ user_id: user.id, meal_id: meal.id });
-    if (error && !error.message.toLowerCase().includes("duplicate")) {
+    if (error) {
       toast.error("Couldn't log it");
       return;
     }
