@@ -15,9 +15,9 @@ import {
   ALLERGENS,
   CheckGroup,
   DIETARY,
-  Glp1Toggle,
   GoalRadio,
   HEALTH,
+  HEALTH_GLP1_OPTION,
   OtherInput,
 } from "@/components/preferences-form";
 
