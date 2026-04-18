@@ -167,14 +167,6 @@ function Onboarding() {
           </Step>
         )}
         {step === 3 && (
-          <Step
-            title="Are you on a GLP-1 medication?"
-            sub="Like Ozempic, Wegovy, or Mounjaro. We'll prioritize balanced, lower-volume meals."
-          >
-            <Glp1Toggle value={glp1} onChange={setGlp1} />
-          </Step>
-        )}
-        {step === 4 && (
           <Step title="What's your eating goal?">
             <GoalRadio value={goal} onChange={setGoal} />
           </Step>
