@@ -13,7 +13,7 @@ export function Logo({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
         <Heart size={icon} className="fill-white text-white" />
       </span>
       <span className={`${text} text-foreground`}>
-        Swipe<span className="text-primary">Bite</span>
+        Swipe<span className="text-primary">&amp;</span>Bite
       </span>
     </Link>
   );

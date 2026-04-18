@@ -41,6 +41,7 @@ export const HEALTH = [
   "Thyroid condition",
   "PCOS",
   "Acid reflux / GERD",
+  "On a GLP-1 (Ozempic, Wegovy, Mounjaro)",
 ];
 export const GOALS = [
   "Lose weight",
