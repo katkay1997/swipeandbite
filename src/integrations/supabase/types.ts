@@ -44,6 +44,7 @@ export type Database = {
           id: string
           matched_at: string
           meal_id: string
+          mode: Database["public"]["Enums"]["swipe_mode"]
           user_id: string
         }
         Insert: {
@@ -51,6 +52,7 @@ export type Database = {
           id?: string
           matched_at?: string
           meal_id: string
+          mode?: Database["public"]["Enums"]["swipe_mode"]
           user_id: string
         }
         Update: {
@@ -58,6 +60,7 @@ export type Database = {
           id?: string
           matched_at?: string
           meal_id?: string
+          mode?: Database["public"]["Enums"]["swipe_mode"]
           user_id?: string
         }
         Relationships: [
@@ -86,6 +89,7 @@ export type Database = {
           macros: Json
           meal_time: string[]
           name: string
+          nutrition: Json
           prep_minutes: number | null
           source: string
           source_id: string | null
@@ -107,6 +111,7 @@ export type Database = {
           macros?: Json
           meal_time?: string[]
           name: string
+          nutrition?: Json
           prep_minutes?: number | null
           source: string
           source_id?: string | null
@@ -128,6 +133,7 @@ export type Database = {
           macros?: Json
           meal_time?: string[]
           name?: string
+          nutrition?: Json
           prep_minutes?: number | null
           source?: string
           source_id?: string | null
