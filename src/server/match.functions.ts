@@ -22,15 +22,16 @@ export const estimateMealNutrition = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { mealId: string }) => z.object({ mealId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    const { supabase } = context;
-    const { data: meal, error } = await supabase
-      .from("meals")
-      .select("id,name,cuisine,ingredients,nutrition,calories,macros")
-      .eq("id", data.mealId)
-      .single();
-    if (error || !meal) {
-      return { nutrition: null, error: "Meal not found" };
-    }
+    try {
+      const { supabase } = context;
+      const { data: meal, error } = await supabase
+        .from("meals")
+        .select("id,name,cuisine,ingredients,nutrition,calories,macros")
+        .eq("id", data.mealId)
+        .single();
+      if (error || !meal) {
+        return { nutrition: null, error: "Meal not found" };
+      }
 
     // Return cached if present
     const cached = meal.nutrition as Partial<Nutrition> | null;
@@ -54,7 +55,7 @@ export const estimateMealNutrition = createServerFn({ method: "POST" })
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: "google/gemini-2.5-flash",
           messages: [
             { role: "system", content: "You are a nutritionist. Always respond by calling the provided tool." },
             { role: "user", content: prompt },
@@ -109,8 +110,12 @@ export const estimateMealNutrition = createServerFn({ method: "POST" })
 
       return { nutrition: parsed.data, error: null, cached: false };
     } catch (e) {
-      console.error("estimateMealNutrition error", e);
+      console.error("estimateMealNutrition AI error", e);
       return { nutrition: null, error: e instanceof Error ? e.message : "Unknown error" };
+    }
+    } catch (outer) {
+      console.error("estimateMealNutrition outer error", outer);
+      return { nutrition: null, error: outer instanceof Error ? outer.message : "Unknown error" };
     }
   });
 
