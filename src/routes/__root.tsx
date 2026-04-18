@@ -1,10 +1,6 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
-import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
-import { AuthProvider } from "@/lib/auth-context";
-import { applyA11y } from "@/lib/a11y";
-import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -33,20 +29,18 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SwipeBite — Find your next meal match" },
-      {
-        name: "description",
-        content:
-          "Swipe right on your next meal. Tinder-style food discovery — cook at home or order takeout, tailored to your preferences.",
-      },
-      { name: "author", content: "SwipeBite" },
-      { property: "og:title", content: "SwipeBite — Find your next meal match" },
-      {
-        property: "og:description",
-        content: "Swipe right on your next meal. Cook or takeout, tailored to you.",
-      },
+      { title: "swipe&bite" },
+      { name: "description", content: "Swipe&Bite helps users discover and decide on meals for cooking or takeout." },
+      { name: "author", content: "Lovable" },
+      { property: "og:title", content: "swipe&bite" },
+      { property: "og:description", content: "Swipe&Bite helps users discover and decide on meals for cooking or takeout." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "swipe&bite" },
+      { name: "twitter:description", content: "Swipe&Bite helps users discover and decide on meals for cooking or takeout." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b35399d8-e354-4692-a952-2fec775c66d2/id-preview-4e310878--fbac5af0-6ef3-488c-8175-91627f18af59.lovable.app-1776548706892.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b35399d8-e354-4692-a952-2fec775c66d2/id-preview-4e310878--fbac5af0-6ef3-488c-8175-91627f18af59.lovable.app-1776548706892.png" },
     ],
     links: [
       {
@@ -75,13 +69,5 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  useEffect(() => {
-    applyA11y();
-  }, []);
-  return (
-    <AuthProvider>
-      <Outlet />
-      <Toaster position="top-center" richColors />
-    </AuthProvider>
-  );
+  return <Outlet />;
 }
