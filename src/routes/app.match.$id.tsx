@@ -317,7 +317,6 @@ function TakeoutView({ meal }: { meal: Tables<"meals"> }) {
     { name: "Google Maps", href: `https://www.google.com/maps/search/?api=1&query=${mapsQuery}` },
   ];
 
-
   async function runSearch(e?: React.FormEvent) {
     e?.preventDefault();
     if (!location.trim()) {
