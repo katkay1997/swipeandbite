@@ -4,7 +4,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo } f
 import { Heart, X, Undo2, Clock, Flame, ChefHat, MapPin, Sparkles } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/lib/auth-context";
+import { getDeviceId } from "@/lib/device-id";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
@@ -21,23 +21,22 @@ export const Route = createFileRoute("/app/swipe")({
 function SwipePage() {
   const { mode } = Route.useSearch();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const userId = getDeviceId();
   const [deck, setDeck] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState<{ meal: Meal; direction: "left" | "right"; swipeId?: string; matchId?: string }[]>([]);
   const [matchMeal, setMatchMeal] = useState<Meal | null>(null);
   const lockRef = useRef(false);
 
-  // Load deck: meals not yet swiped by the user
+  // Load deck: meals not yet swiped by this device
   useEffect(() => {
-    if (!user) return;
     let cancelled = false;
     (async () => {
       setLoading(true);
       const { data: swiped } = await supabase
         .from("swipes")
         .select("meal_id")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .eq("mode", mode);
       const swipedIds = new Set((swiped || []).map((s) => s.meal_id));
 
@@ -73,21 +72,20 @@ function SwipePage() {
     return () => {
       cancelled = true;
     };
-  }, [user, mode]);
+  }, [userId, mode]);
 
   async function commitSwipe(meal: Meal, direction: "left" | "right") {
-    if (!user) return;
     // Insert swipe
     const { data: swipeRow } = await supabase
       .from("swipes")
-      .insert({ user_id: user.id, meal_id: meal.id, mode, direction })
+      .insert({ user_id: userId, meal_id: meal.id, mode, direction })
       .select("id")
       .single();
     let matchId: string | undefined;
     if (direction === "right") {
       const { data: matchRow } = await supabase
         .from("matches")
-        .insert({ user_id: user.id, meal_id: meal.id, mode })
+        .insert({ user_id: userId, meal_id: meal.id, mode })
         .select("id")
         .single();
       matchId = matchRow?.id;
