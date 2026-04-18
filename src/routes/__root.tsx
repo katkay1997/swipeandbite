@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/auth-context";
 import { applyA11y } from "@/lib/a11y";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -80,6 +81,7 @@ function RootComponent() {
   return (
     <AuthProvider>
       <Outlet />
+      <Toaster position="top-center" richColors />
     </AuthProvider>
   );
 }
