@@ -373,18 +373,10 @@ function TakeoutView({ meal }: { meal: Tables<"meals"> }) {
               href={l.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold shadow-sm transition-transform hover:scale-[1.02]"
+              className="inline-flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold shadow-sm transition-transform hover:scale-[1.02]"
               style={{ backgroundColor: l.bg, color: l.fg }}
             >
-              <span className="flex items-center gap-2">
-                <img
-                  src={l.logo}
-                  alt=""
-                  className="h-5 w-5 rounded bg-white/90 object-contain p-0.5"
-                  loading="lazy"
-                />
-                {l.name}
-              </span>
+              {l.name}
               <ExternalLink size={14} className="opacity-80" />
             </a>
           ))}
