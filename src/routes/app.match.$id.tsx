@@ -253,7 +253,7 @@ function NutritionPanel({
       {!loading && nutrition && (
         <>
           <div className="mt-3 grid grid-cols-4 gap-2 text-center">
-            <Stat label="kcal" value={Math.round(nutrition.calories).toString()} />
+            <Stat label="cal" value={Math.round(nutrition.calories).toString()} />
             <Stat label="protein" value={`${Math.round(nutrition.protein_g)}g`} />
             <Stat label="carbs" value={`${Math.round(nutrition.carbs_g)}g`} />
             <Stat label="fat" value={`${Math.round(nutrition.fat_g)}g`} />
