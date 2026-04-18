@@ -15,6 +15,7 @@ const search = z.object({
 });
 
 export const Route = createFileRoute("/auth")({
+  codeSplitGroupings: [["loader", "component"]],
   head: () => ({
     meta: [
       { title: "Sign in — SwipeBite" },
