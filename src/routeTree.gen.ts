@@ -21,6 +21,7 @@ import { Route as AppPinnedRouteImport } from './routes/app.pinned'
 import { Route as AppOnboardingRouteImport } from './routes/app.onboarding'
 import { Route as AppModeRouteImport } from './routes/app.mode'
 import { Route as AppMatchesRouteImport } from './routes/app.matches'
+import { Route as AppMatchIdRouteImport } from './routes/app.match.$id'
 
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -82,6 +83,11 @@ const AppMatchesRoute = AppMatchesRouteImport.update({
   path: '/matches',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMatchIdRoute = AppMatchIdRouteImport.update({
+  id: '/match/$id',
+  path: '/match/$id',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AppSettingsRoute
   '/app/swipe': typeof AppSwipeRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
+  '/app/match/$id': typeof AppMatchIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AppSettingsRoute
   '/app/swipe': typeof AppSwipeRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
+  '/app/match/$id': typeof AppMatchIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/app/settings': typeof AppSettingsRoute
   '/app/swipe': typeof AppSwipeRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
+  '/app/match/$id': typeof AppMatchIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/swipe'
     | '/legal/disclaimer'
+    | '/app/match/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/swipe'
     | '/legal/disclaimer'
+    | '/app/match/$id'
   id:
     | '__root__'
     | '/'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/app/swipe'
     | '/legal/disclaimer'
+    | '/app/match/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -266,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMatchesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/match/$id': {
+      id: '/app/match/$id'
+      path: '/match/$id'
+      fullPath: '/app/match/$id'
+      preLoaderRoute: typeof AppMatchIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -276,6 +295,7 @@ interface AppRouteChildren {
   AppPinnedRoute: typeof AppPinnedRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppSwipeRoute: typeof AppSwipeRoute
+  AppMatchIdRoute: typeof AppMatchIdRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -285,6 +305,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppPinnedRoute: AppPinnedRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppSwipeRoute: AppSwipeRoute,
+  AppMatchIdRoute: AppMatchIdRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -300,3 +321,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
