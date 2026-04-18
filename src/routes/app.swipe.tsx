@@ -79,7 +79,7 @@ function SwipePage() {
     if (direction === "right") {
       const { data: matchRow } = await supabase
         .from("matches")
-        .insert({ user_id: user.id, meal_id: meal.id })
+        .insert({ user_id: user.id, meal_id: meal.id, mode })
         .select("id")
         .single();
       matchId = matchRow?.id;
