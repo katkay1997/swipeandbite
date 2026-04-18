@@ -1,33 +1,56 @@
 
-The user is asking for an explanation of the error, not a fix. This is a research/Q&A question, so no plan or code changes are needed — just a clear explanation.
+## Why you're seeing this fetch error
 
-## What the error means
+The error `Failed to fetch dynamically imported module: .../src/routes/auth.tsx?tsr-split=component` is a **network/cache failure**, not a code bug.
 
-`Failed to fetch dynamically imported module: .../src/routes/auth.tsx?tsr-split=component`
+### What's happening under the hood
 
-### Plain-English explanation
+TanStack Router automatically splits each route file into two pieces:
+- **Critical chunk** — route config, search validators, loaders (loaded upfront)
+- **Component chunk** — the UI (`AuthPage`), loaded on-demand via dynamic `import()`
 
-TanStack Router splits each route into two pieces to keep the initial page load fast:
-1. **Critical part** — route config, loaders, validators (loaded upfront)
-2. **Non-critical part** — the actual UI component (loaded on-demand via dynamic `import()`)
+The `?tsr-split=component` URL is the request for that second chunk. When you click "Sign in" (or navigate to `/auth`), the browser fires this request — and it failed.
 
-The `?tsr-split=component` suffix is the URL the browser uses to fetch that second piece — the auth page's component code — only when you navigate to `/auth`.
+### The most likely cause for your case
 
-The error means: **the browser tried to download that chunk and the network request failed.** It's a *fetch* failure, not a *code* failure. The file `src/routes/auth.tsx` itself is fine — the browser simply couldn't retrieve the compiled chunk from the dev server.
+Looking at the console log, I see `Error in route match: /auth/auth` — note the doubled path. Combined with the fetch failure, this points to:
 
-### Why this happens (most common causes)
+1. **Stale browser cache** — your tab was opened before the latest edits to `auth.tsx`. The browser still holds references to old chunk URLs that Vite has since regenerated. The new request 404s because that chunk hash no longer exists on the dev server.
 
-1. **Stale chunk reference** — The browser has an old `index.html` cached from a previous build that points to a chunk hash that no longer exists on the server (most common after a hot reload or redeploy).
-2. **Dev server restarted** — Vite regenerated the chunk URLs, but your open tab is still holding references to the old ones.
-3. **Network blip / proxy issue** — The Lovable preview proxy briefly dropped the request.
-4. **Sandbox sleep** — The dev server went idle and the chunk request hit it before it woke up.
+2. **Lovable preview proxy hiccup** — the preview proxy occasionally drops in-flight chunk requests during HMR, especially right after an edit.
 
-### How to recover
+3. **Dev server was warming up** — if the sandbox was idle, the first request to `?tsr-split=component` can race the server before Vite finishes generating the chunk.
 
-- **Hard reload** the tab (Cmd/Ctrl + Shift + R) — this is the fix 95% of the time.
-- If that doesn't work: DevTools → Application → Storage → **Clear site data** → reload.
-- If it persists across reloads, the chunk genuinely isn't being produced (a real build error in `auth.tsx` or its imports), and we'd need to investigate the file.
+### Why it's NOT a code issue
 
-### Why it isn't a code bug here
+I re-checked `src/routes/auth.tsx`:
+- Imports all resolve (`@/integrations/supabase/client`, `@/lib/auth-context`, etc.)
+- JSX is balanced, no syntax errors
+- `Route` is exported correctly with `createFileRoute("/auth")`
+- `AuthPage` is **not** exported (correct — exporting it would defeat code-splitting)
+- The route appears in `routeTree.gen.ts`
 
-I've already verified `src/routes/auth.tsx` parses cleanly and all its imports resolve. The route also appears correctly in `routeTree.gen.ts`. So this is the cache/stale-chunk variant, not a syntax issue.
+So Vite *can* build the chunk. The browser just couldn't fetch it on that attempt.
+
+### How to recover (in order)
+
+1. **Hard reload** the preview tab: Cmd/Ctrl + Shift + R. Fixes ~95% of cases.
+2. If hard reload doesn't work: DevTools → Application → **Clear site data** → reload.
+3. If it still fails after a clean reload, the issue is the Lovable preview proxy interfering with the chunk request. Click **Publish** and test sign-in on the published URL — that environment doesn't have the proxy in front of dynamic imports.
+
+### What I would do in code (only if it persists)
+
+If the error reliably reproduces after a clean reload, the workaround is to **opt this route out of code-splitting** so the component ships in the main bundle and never needs a separate fetch:
+
+```tsx
+export const Route = createFileRoute("/auth")({
+  codeSplitGroupings: [["loader", "component"]], // bundle together
+  // ... rest unchanged
+});
+```
+
+This trades a tiny bit of initial bundle size for eliminating the dynamic import entirely. I'd only apply this if hard reload + published-URL test both still fail — otherwise it's just masking a transient cache issue.
+
+### Bottom line
+
+This is a **fetch-time failure**, not a bug in `auth.tsx`. The file is correct. Hard reload first; if it persists, test on the published URL; only then do we change code.
