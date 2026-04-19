@@ -6,8 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Logo } from "@/components/Logo";
-import { supabase } from "@/integrations/supabase/client";
-
+import { useServerFn } from "@tanstack/react-start";
+import { submitContactMessage } from "@/server/contact.functions";
+import { useAuth } from "@/hooks/use-auth";
+import { useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -20,23 +23,43 @@ export const Route = createFileRoute("/contact")({
 });
 
 function Contact() {
+  const { session, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const submitFn = useServerFn(submitContactMessage);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (session?.user.email) setEmail(session.user.email);
+  }, [session]);
+
+  useEffect(() => {
+    if (!authLoading && !session) {
+      toast.error("Please sign in to contact us.");
+      navigate({ to: "/auth" });
+    }
+  }, [authLoading, session, navigate]);
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (message.trim().length === 0 || message.length > 5000) {
+      toast.error("Message must be 1–5000 characters.");
+      return;
+    }
     setLoading(true);
-    const { error } = await supabase.from("contact_messages").insert({
-      email,
-      message,
-      user_id: null,
-    });
-    setLoading(false);
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Message sent — we'll be in touch.");
-      setMessage("");
+    try {
+      const res = await submitFn({ data: { email, message } });
+      if (!res.ok) {
+        toast.error(res.error ?? "Couldn't send message.");
+      } else {
+        toast.success("Message sent — we'll be in touch.");
+        setMessage("");
+      }
+    } catch {
+      toast.error("Couldn't send message. Please try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -55,11 +78,11 @@ function Contact() {
           <div className="mt-5 space-y-3">
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input id="email" type="email" required value={email} readOnly maxLength={255} />
             </div>
             <div>
               <Label htmlFor="msg">Message</Label>
-              <Textarea id="msg" required rows={5} value={message} onChange={(e) => setMessage(e.target.value)} />
+              <Textarea id="msg" required rows={5} maxLength={5000} value={message} onChange={(e) => setMessage(e.target.value)} />
             </div>
           </div>
           <Button type="submit" disabled={loading} className="mt-4 w-full rounded-full">

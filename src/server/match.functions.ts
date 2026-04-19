@@ -113,11 +113,11 @@ export const estimateMealNutrition = createServerFn({ method: "POST" })
       return { nutrition: parsed.data, error: null, cached: false };
     } catch (e) {
       console.error("estimateMealNutrition AI error", e);
-      return { nutrition: null, error: e instanceof Error ? e.message : "Unknown error" };
+      return { nutrition: null, error: "Nutrition estimate unavailable — please try again." };
     }
     } catch (outer) {
       console.error("estimateMealNutrition outer error", outer);
-      return { nutrition: null, error: outer instanceof Error ? outer.message : "Unknown error" };
+      return { nutrition: null, error: "Nutrition estimate unavailable — please try again." };
     }
   });
 
@@ -167,6 +167,6 @@ export const searchTakeoutNearby = createServerFn({ method: "POST" })
       return { results, answer: json.answer ?? null, error: null };
     } catch (e) {
       console.error("searchTakeoutNearby error", e);
-      return { results: [], error: e instanceof Error ? e.message : "Unknown error" };
+      return { results: [], error: "Couldn't search nearby takeout — please try again." };
     }
   });
