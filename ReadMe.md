@@ -25,16 +25,25 @@ Every match is saved so you can come back to it. The app also tracks what you've
 
 ## Features
 
-- **Swipe to match** — drag cards left or right (or tap the buttons). Liked meals are saved to your matches. You can rewind if you change your mind.
-- **Cook or takeout mode** — choose at the start. Cook mode gives you full recipes; takeout mode finds restaurants nearby.
-- **Smart meal timing** — the app automatically loads breakfast, lunch, or dinner meals based on the time of day.
-- **Onboarding quiz** — set your dietary restrictions, allergies, health conditions, and eating goals once. The app filters everything from there.
-- **Match details** — click any saved meal to see ingredients, step-by-step instructions, prep time, estimated cost, and nutrition facts.
-- **AI nutrition estimation** — if nutrition data isn't available, Google Gemini fills it in on the fly.
-- **Restaurant search** — for takeout matches, the app searches for nearby places that serve that meal using live web search.
-- **Eat log** — mark meals as eaten and track your daily calories, protein, carbs, and fat.
-- **Settings & profile** — update your preferences, dietary needs, and profile picture any time.
-- **Accessibility options** — color-blind mode and reduced motion toggle built in.
+- **Swipe to match**, drag cards left or right (or tap the buttons). Liked meals are saved to your matches. You can rewind if you change your mind.
+
+- **Cook or takeout mode**, choose at the start. Cook mode gives you full recipes; takeout mode finds restaurants nearby.
+
+- **Smart meal timing**, the app automatically loads breakfast, lunch, or dinner meals based on the time of day.
+
+- **Onboarding quiz**, set your dietary restrictions, allergies, health conditions, and eating goals once. The app filters everything from there.
+
+- **Match details**, click any saved meal to see ingredients, step-by-step instructions, prep time, estimated cost, and nutrition facts.
+
+- **AI nutrition estimation**, if nutrition data isn't available, Google Gemini fills it in on the fly.
+
+- **Restaurant search**, for takeout matches, the app searches for nearby places that serve that meal using live web search.
+
+- **Eat log**, mark meals as eaten and track your daily calories, protein, carbs, and fat.
+
+- **Settings & profile**, update your preferences, dietary needs, and profile picture any time.
+
+- **Accessibility options**, color-blind mode and reduced motion toggle built in.
 
 ---
 
