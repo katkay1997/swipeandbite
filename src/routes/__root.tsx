@@ -1,6 +1,9 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { MotionConfig } from "framer-motion";
 
 import appCss from "../styles.css?url";
+import { applyA11y, getA11y, A11Y_KEYS } from "@/lib/a11y";
 
 function NotFoundComponent() {
   return (
@@ -69,5 +72,24 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return <Outlet />;
+  const [reduce, setReduce] = useState(false);
+  useEffect(() => {
+    applyA11y();
+    setReduce(getA11y().reduceMotion);
+    const sync = () => {
+      applyA11y();
+      setReduce(getA11y().reduceMotion);
+    };
+    window.addEventListener("storage", sync);
+    window.addEventListener("sb:a11y", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("sb:a11y", sync);
+    };
+  }, []);
+  return (
+    <MotionConfig reducedMotion={reduce ? "always" : "never"}>
+      <Outlet />
+    </MotionConfig>
+  );
 }

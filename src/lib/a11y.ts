@@ -15,14 +15,21 @@ export function applyA11y() {
   root.classList.toggle("rm", rm);
 }
 
+function notify() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event("sb:a11y"));
+}
+
 export function setColorBlind(on: boolean) {
   localStorage.setItem(A11Y_KEYS.colorBlind, on ? "1" : "0");
   applyA11y();
+  notify();
 }
 
 export function setReduceMotion(on: boolean) {
   localStorage.setItem(A11Y_KEYS.reduceMotion, on ? "1" : "0");
   applyA11y();
+  notify();
 }
 
 export function getA11y() {
