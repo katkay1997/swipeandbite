@@ -113,6 +113,9 @@
 
 /* Color-blind friendly palette — cool blues */
 .cb {
+  /* #b5e1f7 ≈ oklch(0.88 0.06 240) */
+  --background: oklch(0.88 0.06 240);
+  --sidebar: oklch(0.88 0.06 240);
   /* #343679 ≈ oklch(0.32 0.13 280) */
   --primary: oklch(0.32 0.13 280);
   --primary-foreground: oklch(0.99 0.01 240);
