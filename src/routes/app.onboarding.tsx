@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { getDeviceId } from "@/lib/device-id";
+import { useAuth } from "@/hooks/use-auth";
 import {
   ALLERGENS,
   CheckGroup,
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/app/onboarding")({
 });
 
 function Onboarding() {
-  const userId = getDeviceId();
+  const { userId } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -37,6 +37,7 @@ function Onboarding() {
 
   // Prefill if exists
   useEffect(() => {
+    if (!userId) return;
     supabase
       .from("preferences")
       .select("*")
@@ -57,6 +58,7 @@ function Onboarding() {
   }, [userId]);
 
   async function finish() {
+    if (!userId) return;
     setSaving(true);
     try {
       const mergedDietary = dietaryOther.trim()

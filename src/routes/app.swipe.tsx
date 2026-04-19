@@ -4,7 +4,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform, type PanInfo } f
 import { Heart, X, Undo2, Clock, Flame, ChefHat, MapPin, Sparkles } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { getDeviceId } from "@/lib/device-id";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
@@ -21,15 +21,16 @@ export const Route = createFileRoute("/app/swipe")({
 function SwipePage() {
   const { mode } = Route.useSearch();
   const navigate = useNavigate();
-  const userId = getDeviceId();
+  const { userId } = useAuth();
   const [deck, setDeck] = useState<Meal[]>([]);
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState<{ meal: Meal; direction: "left" | "right"; swipeId?: string; matchId?: string }[]>([]);
   const [matchMeal, setMatchMeal] = useState<Meal | null>(null);
   const lockRef = useRef(false);
 
-  // Load deck: meals not yet swiped by this device
+  // Load deck: meals not yet swiped by this user
   useEffect(() => {
+    if (!userId) return;
     let cancelled = false;
     (async () => {
       setLoading(true);
@@ -75,6 +76,7 @@ function SwipePage() {
   }, [userId, mode]);
 
   async function commitSwipe(meal: Meal, direction: "left" | "right") {
+    if (!userId) return;
     // Insert swipe
     const { data: swipeRow } = await supabase
       .from("swipes")
@@ -112,8 +114,11 @@ function SwipePage() {
     }
     setHistory((h) => h.slice(0, -1));
     setDeck((d) => [...d, last.meal]);
-    if (last.swipeId) await supabase.from("swipes").delete().eq("id", last.swipeId);
-    if (last.matchId) await supabase.from("matches").delete().eq("id", last.matchId);
+    if (!userId) return;
+    if (last.swipeId)
+      await supabase.from("swipes").delete().eq("id", last.swipeId).eq("user_id", userId);
+    if (last.matchId)
+      await supabase.from("matches").delete().eq("id", last.matchId).eq("user_id", userId);
   }
 
   if (loading) {

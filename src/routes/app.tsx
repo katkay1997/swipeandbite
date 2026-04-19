@@ -1,9 +1,10 @@
 import { createFileRoute, Outlet, useNavigate, Link, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Heart, ChefHat, MapPin, Utensils, Settings as SettingsIcon } from "lucide-react";
+import { Heart, ChefHat, MapPin, Utensils, Settings as SettingsIcon, LogOut } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
-import { getDeviceId } from "@/lib/device-id";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/app")({
   component: AppLayout,
@@ -12,38 +13,35 @@ export const Route = createFileRoute("/app")({
 function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [checking, setChecking] = useState(true);
+  const { userId, loading } = useAuth();
+  const [checkingProfile, setCheckingProfile] = useState(true);
 
   useEffect(() => {
-    const id = getDeviceId();
+    if (loading) return;
+    if (!userId) {
+      navigate({ to: "/auth" });
+      return;
+    }
     (async () => {
-      // Ensure profile row exists for this device
+      // Profile is auto-created by trigger on signup; just check onboarding state
       const { data } = await supabase
         .from("profiles")
         .select("onboarding_complete")
-        .eq("id", id)
+        .eq("id", userId)
         .maybeSingle();
-      if (!data) {
-        await supabase.from("profiles").insert({ id, onboarding_complete: false });
-        await supabase.from("preferences").insert({ user_id: id });
-        if (
-          !location.pathname.startsWith("/app/onboarding") &&
-          !location.pathname.startsWith("/app/settings")
-        ) {
-          navigate({ to: "/app/onboarding" });
-        }
-      } else if (
+      if (
+        data &&
         !data.onboarding_complete &&
         !location.pathname.startsWith("/app/onboarding") &&
         !location.pathname.startsWith("/app/settings")
       ) {
         navigate({ to: "/app/onboarding" });
       }
-      setChecking(false);
+      setCheckingProfile(false);
     })();
-  }, [navigate, location.pathname]);
+  }, [userId, loading, navigate, location.pathname]);
 
-  if (checking) {
+  if (loading || (userId && checkingProfile)) {
     return (
       <div className="grid min-h-screen place-items-center" style={{ background: "var(--gradient-soft)" }}>
         <div className="text-muted-foreground">Loading…</div>
@@ -51,12 +49,22 @@ function AppLayout() {
     );
   }
 
+  if (!userId) return null;
+
   const isOnboarding = location.pathname.startsWith("/app/onboarding");
+
+  async function signOut() {
+    await supabase.auth.signOut();
+    navigate({ to: "/auth" });
+  }
 
   return (
     <div className="min-h-screen pb-20" style={{ background: "var(--gradient-soft)" }}>
       <header className="mx-auto flex max-w-2xl items-center justify-between px-5 py-4">
         <Logo size="sm" />
+        <Button variant="ghost" size="sm" onClick={signOut} aria-label="Sign out">
+          <LogOut size={16} />
+        </Button>
       </header>
       <main className="mx-auto max-w-2xl px-5">
         <Outlet />

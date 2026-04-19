@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const NutritionSchema = z.object({
   calories: z.number(),
@@ -20,6 +21,7 @@ export type Nutrition = z.infer<typeof NutritionSchema>;
  * Caches the result on meals.nutrition so subsequent opens are instant + free.
  */
 export const estimateMealNutrition = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: { mealId: string }) => z.object({ mealId: z.string().uuid() }).parse(input))
   .handler(async ({ data }) => {
     try {
@@ -123,6 +125,7 @@ export const estimateMealNutrition = createServerFn({ method: "POST" })
  * Find nearby restaurants serving a meal/dish using Tavily search.
  */
 export const searchTakeoutNearby = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input: { mealName: string; cuisine?: string; location: string }) =>
     z
       .object({

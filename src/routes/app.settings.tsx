@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
-import { getDeviceId } from "@/lib/device-id";
+import { useAuth } from "@/hooks/use-auth";
 import { getA11y, setColorBlind, setReduceMotion } from "@/lib/a11y";
 import { Camera, Mail } from "lucide-react";
 import {
@@ -36,7 +36,7 @@ function splitOther(values: string[] | null | undefined) {
 }
 
 function Settings() {
-  const userId = getDeviceId();
+  const { userId } = useAuth();
   const [displayName, setName] = useState("");
   const [bio, setBio] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
@@ -57,6 +57,7 @@ function Settings() {
     const a = getA11y();
     setCb(a.colorBlind);
     setRm(a.reduceMotion);
+    if (!userId) return;
     supabase
       .from("profiles")
       .select("display_name, food_bio, avatar_url, color_blind, reduce_motion")
@@ -94,7 +95,7 @@ function Settings() {
 
   async function uploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !userId) return;
     const ext = file.name.split(".").pop();
     const path = `${userId}/avatar-${Date.now()}.${ext}`;
     const { error } = await supabase.storage
@@ -114,6 +115,7 @@ function Settings() {
   }
 
   async function save() {
+    if (!userId) return;
     setSaving(true);
     try {
       const mergedDietary = dietaryOther.trim()
