@@ -72,8 +72,24 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  const [reduce, setReduce] = useState(false);
   useEffect(() => {
     applyA11y();
+    setReduce(getA11y().reduceMotion);
+    const sync = () => {
+      applyA11y();
+      setReduce(getA11y().reduceMotion);
+    };
+    window.addEventListener("storage", sync);
+    window.addEventListener("sb:a11y", sync);
+    return () => {
+      window.removeEventListener("storage", sync);
+      window.removeEventListener("sb:a11y", sync);
+    };
   }, []);
-  return <Outlet />;
+  return (
+    <MotionConfig reducedMotion={reduce ? "always" : "never"}>
+      <Outlet />
+    </MotionConfig>
+  );
 }
