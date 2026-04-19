@@ -83,7 +83,7 @@ function BottomNav() {
           <Link
             key={it.to}
             to={it.to}
-            className="flex flex-col items-center gap-0.5 rounded-full px-3 py-1.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="flex w-16 flex-col items-center justify-center gap-0.5 rounded-full px-3 py-1.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             activeProps={{ className: "text-primary-foreground", style: { background: "var(--gradient-warm)" } }}
           >
             {it.icon}
