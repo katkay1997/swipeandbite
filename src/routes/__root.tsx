@@ -71,5 +71,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  useEffect(() => {
+    applyA11y();
+  }, []);
   return <Outlet />;
 }
