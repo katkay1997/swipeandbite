@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Utensils, Trash2, Flame } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { getDeviceId } from "@/lib/device-id";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
@@ -43,7 +43,7 @@ function hasNutrition(n: unknown): n is Nutrition {
 }
 
 function AtePage() {
-  const userId = getDeviceId();
+  const { userId } = useAuth();
   const estimate = useServerFn(estimateMealNutrition);
   const [rows, setRows] = useState<PinRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +51,7 @@ function AtePage() {
   const [estimating, setEstimating] = useState(false);
 
   useEffect(() => {
+    if (!userId) return;
     (async () => {
       const { data } = await supabase
         .from("pins")
@@ -119,7 +120,8 @@ function AtePage() {
   }, [today]);
 
   async function remove(id: string) {
-    await supabase.from("pins").delete().eq("id", id);
+    if (!userId) return;
+    await supabase.from("pins").delete().eq("id", id).eq("user_id", userId);
     setRows((r) => r.filter((x) => x.id !== id));
     toast.success("Removed");
   }

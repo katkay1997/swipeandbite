@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Heart, Trash2, ChefHat, MapPin, Clock, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { getDeviceId } from "@/lib/device-id";
+import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -26,12 +26,13 @@ export const Route = createFileRoute("/app/matches")({
 });
 
 function MatchesPage() {
-  const userId = getDeviceId();
+  const { userId } = useAuth();
   const [rows, setRows] = useState<MatchRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"cook" | "takeout">("cook");
 
   useEffect(() => {
+    if (!userId) return;
     void load();
     async function load() {
       setLoading(true);
@@ -50,12 +51,14 @@ function MatchesPage() {
   const takeout = useMemo(() => rows.filter((r) => r.mode === "takeout"), [rows]);
 
   async function remove(id: string) {
-    await supabase.from("matches").delete().eq("id", id);
+    if (!userId) return;
+    await supabase.from("matches").delete().eq("id", id).eq("user_id", userId);
     setRows((r) => r.filter((x) => x.id !== id));
     toast.success("Removed");
   }
 
   async function clearAll() {
+    if (!userId) return;
     const { error } = await supabase.from("matches").delete().eq("user_id", userId);
     if (error) {
       toast.error("Couldn't clear matches");
