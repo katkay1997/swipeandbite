@@ -1,8 +1,9 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { MotionConfig } from "framer-motion";
 
 import appCss from "../styles.css?url";
-import { applyA11y } from "@/lib/a11y";
+import { applyA11y, getA11y, A11Y_KEYS } from "@/lib/a11y";
 
 function NotFoundComponent() {
   return (
