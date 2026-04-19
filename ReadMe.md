@@ -1,6 +1,15 @@
 # Swipe & Bite
 
-Hyper-personalized meal discovery — swipe right to eat well.
+Hyper-personalized meal discovery, *swipe right to eat well*.
+
+This app is for **everybody**, but it's especially for people who want to improve their health
+
+Problems we face as students:
+- Not knowing enough about nutrition (it might not matter now, but it will later)
+- Can't decide what to eat each day
+- No way to show a nutritionist or doctor what I've been eating
+- Wasting time scrolling through options instead of eating efficiently 
+
 
 ---
 
