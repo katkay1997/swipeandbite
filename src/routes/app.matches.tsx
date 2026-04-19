@@ -33,13 +33,14 @@ function MatchesPage() {
 
   useEffect(() => {
     if (!userId) return;
+    const uid = userId;
     void load();
     async function load() {
       setLoading(true);
       const { data } = await supabase
         .from("matches")
         .select("*, meal:meals(*)")
-        .eq("user_id", userId)
+        .eq("user_id", uid)
         .eq("archived", false)
         .order("matched_at", { ascending: false });
       setRows((data as MatchRow[]) || []);
