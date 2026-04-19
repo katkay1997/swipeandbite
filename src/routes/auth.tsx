@@ -19,7 +19,7 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -49,6 +49,13 @@ function AuthPage() {
         if (error) throw error;
         toast.success("Account created! Welcome.");
         navigate({ to: "/app/onboarding" });
+      } else if (mode === "forgot") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) throw error;
+        toast.success("Check your email for a reset link.");
+        setMode("signin");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -78,12 +85,18 @@ function AuthPage() {
           style={{ boxShadow: "var(--shadow-card)" }}
         >
           <h1 className="text-2xl font-bold">
-            {mode === "signup" ? "Create your account" : "Welcome back"}
+            {mode === "signup"
+              ? "Create your account"
+              : mode === "forgot"
+                ? "Reset your password"
+                : "Welcome back"}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {mode === "signup"
               ? "Sign up to save your matches and preferences."
-              : "Sign in to pick up where you left off."}
+              : mode === "forgot"
+                ? "Enter your email and we'll send you a reset link."
+                : "Sign in to pick up where you left off."}
           </p>
 
           <div className="mt-5 space-y-3">
@@ -110,18 +123,31 @@ function AuthPage() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                minLength={6}
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+            {mode !== "forgot" && (
+              <div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  {mode === "signin" && (
+                    <button
+                      type="button"
+                      onClick={() => setMode("forgot")}
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  minLength={6}
+                  autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+            )}
           </div>
 
           <Button
@@ -130,17 +156,27 @@ function AuthPage() {
             className="mt-5 w-full rounded-full"
             style={{ background: "var(--gradient-warm)", color: "white" }}
           >
-            {loading ? "Please wait…" : mode === "signup" ? "Sign up" : "Sign in"}
+            {loading
+              ? "Please wait…"
+              : mode === "signup"
+                ? "Sign up"
+                : mode === "forgot"
+                  ? "Send reset link"
+                  : "Sign in"}
           </Button>
 
           <button
             type="button"
-            onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
+            onClick={() =>
+              setMode(mode === "signin" ? "signup" : "signin")
+            }
             className="mt-4 w-full text-center text-sm text-muted-foreground hover:text-foreground"
           >
             {mode === "signup"
               ? "Already have an account? Sign in"
-              : "New here? Create an account"}
+              : mode === "forgot"
+                ? "Back to sign in"
+                : "New here? Create an account"}
           </button>
         </form>
       </main>
